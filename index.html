@@ -15,34 +15,50 @@
   <div class="g-h">Good to see you,<br><em>Wabi!</em></div>
   <div class="g-s">something sweet is waiting for you</div>
   <button class="g-btn" onclick="enterRoom()">Come in</button>
+  <div class="g-grain"></div>
 </div>
 
 <div id="room">
-  <canvas id="room-canvas"></canvas>
+  <div id="room-bg">
+    <canvas id="room-canvas"></canvas>
+    <div id="room-ai-layer"></div>
+  </div>
+
   <div id="items-layer">
 
-    <!-- ENVELOPE -->
-    <div class="item-wrap" id="item-envelope" onclick="openItem('envelope')">
-      <canvas class="item-canvas" id="cv-envelope" width="220" height="155"></canvas>
+    <!-- ENVELOPE — pen-btn is a sibling of the canvas, with higher z-index -->
+    <div class="item-wrap" id="item-envelope">
       <div class="item-badge" id="env-badge">0</div>
-      <button class="pen-btn" id="pen-btn" onclick="pencilClick(event)">pen <span id="pen-n">0</span>/10</button>
+      <canvas class="item-canvas" id="cv-envelope" width="220" height="155" onclick="openItem('envelope')"></canvas>
+      <button class="pen-btn" id="pen-btn" onclick="pencilClick(event)">
+        <span class="pen-icon">✏</span> pen <span id="pen-n">0</span>/10
+      </button>
       <div class="item-label">Letters</div>
+      <div class="item-hover-indicator">
+        <span class="hover-dot"></span><span class="hover-dot"></span><span class="hover-dot"></span>
+      </div>
     </div>
 
     <!-- CAMERA -->
     <div class="item-wrap" id="item-camera" onclick="openItem('camera')">
       <canvas class="item-canvas" id="cv-camera" width="260" height="185"></canvas>
       <div class="item-label">Camera</div>
+      <div class="item-hover-indicator">
+        <span class="hover-dot"></span><span class="hover-dot"></span><span class="hover-dot"></span>
+      </div>
     </div>
 
     <!-- FRAME -->
     <div class="item-wrap" id="item-frame" onclick="openItem('frame')">
       <canvas class="item-canvas" id="cv-frame" width="200" height="190"></canvas>
       <div class="item-label">Frame</div>
+      <div class="item-hover-indicator">
+        <span class="hover-dot"></span><span class="hover-dot"></span><span class="hover-dot"></span>
+      </div>
     </div>
 
     <!-- WALKMAN -->
-    <div class="item-wrap" id="item-walkman" onclick="openItem('walkman')" style="position:relative">
+    <div class="item-wrap" id="item-walkman" onclick="openItem('walkman')">
       <div class="postit-note">
         Playlist<br>
         <a href="https://www.youtube.com/playlist?list=YOUR_PLAYLIST_ID" target="_blank" onclick="event.stopPropagation()">YouTube</a>
@@ -50,10 +66,15 @@
       </div>
       <canvas class="item-canvas" id="cv-walkman" width="230" height="175"></canvas>
       <div class="item-label">Walkman</div>
+      <div class="item-hover-indicator">
+        <span class="hover-dot"></span><span class="hover-dot"></span><span class="hover-dot"></span>
+      </div>
     </div>
 
   </div>
-  <div id="lamp-btn" onclick="toggleLamp()"></div>
+
+  <div id="lamp-btn" onclick="toggleLamp()" title="Toggle lamp"></div>
+  <div id="room-grain"></div>
 </div>
 
 <div id="overlay" onclick="ovBgClick(event)">
@@ -68,5 +89,6 @@
 <script src="draw.js"></script>
 <script src="overlay.js"></script>
 <script src="app.js"></script>
+<script src="room-gen.js"></script>
 </body>
 </html>

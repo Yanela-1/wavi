@@ -9,6 +9,7 @@ const APP = {
   reelAngle: 0,
 };
 const AUD = document.getElementById('aud');
+
 function saveApp(){
   localStorage.setItem('wb_l', JSON.stringify(APP.letters));
   localStorage.setItem('wb_p', JSON.stringify(APP.photos));
@@ -16,7 +17,12 @@ function saveApp(){
   localStorage.setItem('wb_pl', JSON.stringify(APP.pl));
 }
 
-const GIFS=['https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif','https://media.giphy.com/media/xT77XWum9yH7zNkFW0/giphy.gif','https://media.giphy.com/media/VGG8UY1nEl66Y/giphy.gif','https://media.giphy.com/media/3o6ZtaO9BZHcOjmErm/giphy.gif'];
+const GIFS=[
+  'https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif',
+  'https://media.giphy.com/media/xT77XWum9yH7zNkFW0/giphy.gif',
+  'https://media.giphy.com/media/VGG8UY1nEl66Y/giphy.gif',
+  'https://media.giphy.com/media/3o6ZtaO9BZHcOjmErm/giphy.gif'
+];
 
 let roomDirty = true;
 let itemsDone  = false;
@@ -37,14 +43,14 @@ function enterRoom(){
   }, 2000);
 }
 
-// ── ROOM ───────────────────────────────────────────────────────────────────
+// ── ROOM ──────────────────────────────────────────────────────
 function initRoom(){
   const canvas = document.getElementById('room-canvas');
   const resize = () => {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
     roomDirty = true;
-    itemsDone = false; // redraw items on resize
+    itemsDone = false;
   };
   window.addEventListener('resize', resize);
   resize();
@@ -52,7 +58,7 @@ function initRoom(){
 
 function scheduleRoom(){ roomDirty = true; }
 
-// ── MAIN LOOP ──────────────────────────────────────────────────────────────
+// ── MAIN LOOP ─────────────────────────────────────────────────
 function startLoop(){
   let lastT = 0;
   (function frame(ts){
@@ -73,7 +79,6 @@ function startLoop(){
       itemsDone = true;
     }
 
-    // walkman reel animation — keep redrawing when playing
     if(APP.playing){
       const wkc = document.getElementById('cv-walkman');
       if(wkc) drawWalkman(wkc, true, APP.reelAngle);
@@ -94,15 +99,16 @@ function renderAllItems(){
   if(wkc) drawWalkman(wkc, APP.playing, APP.reelAngle);
 }
 
-// ── LAMP ───────────────────────────────────────────────────────────────────
+// ── LAMP ──────────────────────────────────────────────────────
 function toggleLamp(){
   APP.lampOn = !APP.lampOn;
   document.body.classList.toggle('lamp-on', APP.lampOn);
   document.body.classList.toggle('lamp-off', !APP.lampOn);
   scheduleRoom();
+  showT(APP.lampOn ? 'Lamp on ☀' : 'Lamp off 🌙');
 }
 
-// ── ITEM ROUTING ──────────────────────────────────────────────────────────
+// ── ITEM ROUTING ──────────────────────────────────────────────
 function openItem(type){
   switch(type){
     case 'envelope': openEnvOv(); setTimeout(renderOvEnvCanvas, 60); break;
@@ -112,7 +118,7 @@ function openItem(type){
   }
 }
 
-// ── PEN ────────────────────────────────────────────────────────────────────
+// ── PEN ───────────────────────────────────────────────────────
 function pencilClick(e){
   e.stopPropagation();
   APP.pn++;
@@ -121,14 +127,21 @@ function pencilClick(e){
     APP.pn=0; APP.ei=null;
     document.getElementById('pen-n').textContent='0';
     openOv(buildEdHTML());
-    showT('Time to write something sweet');
+    showT('Time to write something sweet ✉');
   } else {
-    showT(`${10-APP.pn} more click${10-APP.pn!==1?'s':''} to unlock`);
+    const left = 10 - APP.pn;
+    showT(`${left} more click${left!==1?'s':''} to unlock`);
+    // Wiggle the pen button
+    const btn = document.getElementById('pen-btn');
+    if(btn){ btn.style.transform='scale(1.25) rotate(-8deg)'; setTimeout(()=>{btn.style.transform='';},250); }
   }
 }
-function updBadge(){ document.getElementById('env-badge').textContent=APP.letters.length; }
+function updBadge(){
+  const b = document.getElementById('env-badge');
+  if(b) b.textContent = APP.letters.length;
+}
 
-// ── AUDIO ──────────────────────────────────────────────────────────────────
+// ── AUDIO ─────────────────────────────────────────────────────
 function initAudio(){
   AUD.addEventListener('timeupdate', updProg);
   AUD.addEventListener('ended', nextT);
@@ -164,17 +177,17 @@ function updProg(){
 }
 function rPL(){document.querySelectorAll('.pl-item').forEach((el,i)=>{el.className=`pl-item${i===APP.ti?' cur':''}`;});}
 
-// ── FRAME REFRESH on photo change ──────────────────────────────────────────
+// ── FRAME REFRESH ─────────────────────────────────────────────
 function refreshFrame(){
   const frc = document.getElementById('cv-frame');
   if(frc){ drawPictureFrame(frc, APP.photos, APP.fi); }
   scheduleRoom();
 }
 
-// ── TOAST ──────────────────────────────────────────────────────────────────
+// ── TOAST ─────────────────────────────────────────────────────
 let toastT;
 function showT(m){
-  const t=document.getElementById('toast');t.textContent=m;
-  t.classList.add('show');clearTimeout(toastT);
+  const t=document.getElementById('toast'); t.textContent=m;
+  t.classList.add('show'); clearTimeout(toastT);
   toastT=setTimeout(()=>t.classList.remove('show'),2700);
 }
