@@ -1,6 +1,4 @@
-// app.js — State management, audio, render loop, item interaction
-
-// ── STATE ─────────────────────────────────────────────────────────────────────
+// app.js
 const APP = {
   letters:   JSON.parse(localStorage.getItem('wb_l') || '[]'),
   photos:    JSON.parse(localStorage.getItem('wb_p') || '[]'),
@@ -18,8 +16,11 @@ function saveApp(){
   localStorage.setItem('wb_pl', JSON.stringify(APP.pl));
 }
 
-// ── GREETING ──────────────────────────────────────────────────────────────────
 const GIFS=['https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif','https://media.giphy.com/media/xT77XWum9yH7zNkFW0/giphy.gif','https://media.giphy.com/media/VGG8UY1nEl66Y/giphy.gif','https://media.giphy.com/media/3o6ZtaO9BZHcOjmErm/giphy.gif'];
+
+let roomDirty = true;
+let itemsDone  = false;
+
 window.onload = () => {
   document.getElementById('g-gif').src = GIFS[Math.floor(Math.random()*GIFS.length)];
   updBadge();
@@ -27,6 +28,7 @@ window.onload = () => {
   initRoom();
   startLoop();
 };
+
 function enterRoom(){
   document.getElementById('greeting').classList.add('out');
   setTimeout(()=>{
@@ -35,103 +37,82 @@ function enterRoom(){
   }, 2000);
 }
 
-// ── ROOM CANVAS SIZING ────────────────────────────────────────────────────────
-const RENDER = {
-  dirty: true,
-  scheduleRoom(){ this.dirty = true; },
-};
-
+// ── ROOM ───────────────────────────────────────────────────────────────────
 function initRoom(){
   const canvas = document.getElementById('room-canvas');
   const resize = () => {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
-    RENDER.scheduleRoom();
+    roomDirty = true;
+    itemsDone = false; // redraw items on resize
   };
   window.addEventListener('resize', resize);
   resize();
 }
 
-function renderRoom(){
-  const canvas = document.getElementById('room-canvas');
-  if(!canvas) return;
-  if(canvas.width !== window.innerWidth || canvas.height !== window.innerHeight){
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  drawRoom(canvas, APP.lampOn, APP.photos, APP.fi);
-  RENDER.dirty = false;
+function scheduleRoom(){ roomDirty = true; }
+
+// ── MAIN LOOP ──────────────────────────────────────────────────────────────
+function startLoop(){
+  let lastT = 0;
+  (function frame(ts){
+    const dt = Math.min((ts - lastT)/1000, 0.1);
+    lastT = ts;
+
+    if(APP.playing) APP.reelAngle += dt * 2.2;
+
+    if(roomDirty){
+      const canvas = document.getElementById('room-canvas');
+      if(canvas.width !== window.innerWidth){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+      drawRoom(canvas, APP.lampOn, APP.photos, APP.fi);
+      roomDirty = false;
+    }
+
+    if(!itemsDone){
+      renderAllItems();
+      itemsDone = true;
+    }
+
+    // walkman reel animation — keep redrawing when playing
+    if(APP.playing){
+      const wkc = document.getElementById('cv-walkman');
+      if(wkc) drawWalkman(wkc, true, APP.reelAngle);
+    }
+
+    requestAnimationFrame(frame);
+  })(0);
 }
 
-// ── ITEM CANVASES ─────────────────────────────────────────────────────────────
-function renderItems(){
+function renderAllItems(){
   const evc = document.getElementById('cv-envelope');
   const cmc = document.getElementById('cv-camera');
   const frc = document.getElementById('cv-frame');
   const wkc = document.getElementById('cv-walkman');
-
   if(evc) drawEnvelope(evc);
   if(cmc) drawCamera(cmc);
   if(frc) drawPictureFrame(frc, APP.photos, APP.fi);
   if(wkc) drawWalkman(wkc, APP.playing, APP.reelAngle);
 }
 
-let itemsRendered = false;
-
-// ── MAIN LOOP ─────────────────────────────────────────────────────────────────
-function startLoop(){
-  let lastT = 0;
-  function frame(ts){
-    const dt = Math.min((ts - lastT)/1000, 0.1);
-    lastT = ts;
-
-    // reel spin
-    if(APP.playing){
-      APP.reelAngle += dt * 2.2;
-      // redraw walkman on room canvas
-      RENDER.scheduleRoom();
-      // update overlay walkman canvas if open
-      if(APP.cv==='walkman'){
-        const c=document.getElementById('ov-wk-canvas');
-        if(c) drawWalkman(c, APP.playing, APP.reelAngle);
-      }
-      // LED pulse on room walkman canvas dot
-      const led = document.getElementById('rm-led');
-      // handled in drawRoom via reelAngle
-    }
-
-    if(RENDER.dirty){
-      renderRoom();
-    }
-    if(!itemsRendered){
-      renderItems();
-      itemsRendered=true;
-    }
-
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-}
-
-// ── LAMP ──────────────────────────────────────────────────────────────────────
+// ── LAMP ───────────────────────────────────────────────────────────────────
 function toggleLamp(){
   APP.lampOn = !APP.lampOn;
   document.body.classList.toggle('lamp-on', APP.lampOn);
   document.body.classList.toggle('lamp-off', !APP.lampOn);
-  RENDER.scheduleRoom();
+  scheduleRoom();
 }
 
-// ── ITEM CLICK ROUTING ────────────────────────────────────────────────────────
+// ── ITEM ROUTING ──────────────────────────────────────────────────────────
 function openItem(type){
   switch(type){
-    case 'envelope': openEnvOv(); setTimeout(renderOvEnvCanvas, 50); break;
+    case 'envelope': openEnvOv(); setTimeout(renderOvEnvCanvas, 60); break;
     case 'camera':   openCamOv(); break;
     case 'frame':    openFrameOv(); break;
     case 'walkman':  openWkOv(); break;
   }
 }
 
-// ── PEN BUTTON ────────────────────────────────────────────────────────────────
+// ── PEN ────────────────────────────────────────────────────────────────────
 function pencilClick(e){
   e.stopPropagation();
   APP.pn++;
@@ -147,7 +128,7 @@ function pencilClick(e){
 }
 function updBadge(){ document.getElementById('env-badge').textContent=APP.letters.length; }
 
-// ── AUDIO ─────────────────────────────────────────────────────────────────────
+// ── AUDIO ──────────────────────────────────────────────────────────────────
 function initAudio(){
   AUD.addEventListener('timeupdate', updProg);
   AUD.addEventListener('ended', nextT);
@@ -159,7 +140,6 @@ function togglePlay(){
   else { if(!AUD.src||AUD.src===location.href) loadT(APP.ti,false); AUD.play().catch(()=>{}); APP.playing=true; }
   const b=document.getElementById('wpb');
   if(b){ b.innerHTML=APP.playing?'&#10074;&#10074;':'&#9654;'; b.className=`wk-btn lg${APP.playing?' playing':''}`; }
-  if(APP.cv==='walkman'){ const c=document.getElementById('ov-wk-canvas'); if(c)drawWalkman(c,APP.playing,APP.reelAngle); }
 }
 function loadT(i,play){
   if(!APP.pl.length)return;
@@ -184,7 +164,14 @@ function updProg(){
 }
 function rPL(){document.querySelectorAll('.pl-item').forEach((el,i)=>{el.className=`pl-item${i===APP.ti?' cur':''}`;});}
 
-// ── TOAST ─────────────────────────────────────────────────────────────────────
+// ── FRAME REFRESH on photo change ──────────────────────────────────────────
+function refreshFrame(){
+  const frc = document.getElementById('cv-frame');
+  if(frc){ drawPictureFrame(frc, APP.photos, APP.fi); }
+  scheduleRoom();
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────
 let toastT;
 function showT(m){
   const t=document.getElementById('toast');t.textContent=m;

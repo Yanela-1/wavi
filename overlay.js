@@ -104,7 +104,7 @@ return `<div class="ov-panel"><button class="ov-close" onclick="closeOv()" style
   </div>
 </div></div>`}
 function selPh(i){APP.ci=i;document.getElementById('ov-wrap').innerHTML=buildCamHTML();document.getElementById('photo-up').onchange=handlePh}
-function handlePh(e){const files=Array.from(e.target.files);let done=0;files.forEach(f=>{const r=new FileReader();r.onload=ev=>{APP.photos.push(ev.target.result);done++;if(done===files.length){saveApp();APP.ci=APP.photos.length-1;document.getElementById('ov-wrap').innerHTML=buildCamHTML();document.getElementById('photo-up').onchange=handlePh;showT(`${files.length} photo(s) added`);RENDER.scheduleRoom()}};r.readAsDataURL(f)});e.target.value=''}
+function handlePh(e){const files=Array.from(e.target.files);let done=0;files.forEach(f=>{const r=new FileReader();r.onload=ev=>{APP.photos.push(ev.target.result);done++;if(done===files.length){saveApp();APP.ci=APP.photos.length-1;document.getElementById('ov-wrap').innerHTML=buildCamHTML();document.getElementById('photo-up').onchange=handlePh;showT(`${files.length} photo(s) added`);refreshFrame()}};r.readAsDataURL(f)});e.target.value=''}
 
 // ── FRAME ─────────────────────────────────────────────────────────────────────
 function openFrameOv(){APP.cv='frame';openOv(buildFrameHTML());setTimeout(renderOvFrameCanvas,50)}
@@ -121,7 +121,7 @@ return `<div class="ov-panel"><button class="ov-close" onclick="closeOv()">x &nb
   </div>
 </div></div>`}
 function renderOvFrameCanvas(){const c=document.getElementById('ov-frame-canvas');if(c)drawPictureFrame(c,APP.photos,APP.fi)}
-function setFrm(i){APP.fi=APP.fi===i?-1:i;saveApp();RENDER.scheduleRoom();openFrameOv()}
+function setFrm(i){APP.fi=APP.fi===i?-1:i;saveApp();refreshFrame();openFrameOv()}
 
 // ── WALKMAN ───────────────────────────────────────────────────────────────────
 function openWkOv(){APP.cv='walkman';openOv(buildWkHTML());setTimeout(renderOvWkCanvas,50);document.getElementById('song-up').onchange=handleSongs}
