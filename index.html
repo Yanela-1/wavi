@@ -26,13 +26,14 @@
 
   <div id="items-layer">
 
-    <!-- ENVELOPE — pen-btn is a sibling of the canvas, with higher z-index -->
-    <div class="item-wrap" id="item-envelope">
+    <!-- ENVELOPE -->
+    <div class="item-wrap" id="item-envelope" data-tip="Letters" onclick="openItem('envelope')">
       <div class="item-badge" id="env-badge">0</div>
-      <canvas class="item-canvas" id="cv-envelope" width="220" height="155" onclick="openItem('envelope')"></canvas>
+      <!-- Pen button OUTSIDE the canvas, higher z-index -->
       <button class="pen-btn" id="pen-btn" onclick="pencilClick(event)">
         <span class="pen-icon">✏</span> pen <span id="pen-n">0</span>/10
       </button>
+      <canvas class="item-canvas" id="cv-envelope" width="220" height="155"></canvas>
       <div class="item-label">Letters</div>
       <div class="item-hover-indicator">
         <span class="hover-dot"></span><span class="hover-dot"></span><span class="hover-dot"></span>
@@ -40,7 +41,7 @@
     </div>
 
     <!-- CAMERA -->
-    <div class="item-wrap" id="item-camera" onclick="openItem('camera')">
+    <div class="item-wrap" id="item-camera" data-tip="Camera" onclick="openItem('camera')">
       <canvas class="item-canvas" id="cv-camera" width="260" height="185"></canvas>
       <div class="item-label">Camera</div>
       <div class="item-hover-indicator">
@@ -49,7 +50,7 @@
     </div>
 
     <!-- FRAME -->
-    <div class="item-wrap" id="item-frame" onclick="openItem('frame')">
+    <div class="item-wrap" id="item-frame" data-tip="Photo Frame" onclick="openItem('frame')">
       <canvas class="item-canvas" id="cv-frame" width="200" height="190"></canvas>
       <div class="item-label">Frame</div>
       <div class="item-hover-indicator">
@@ -58,7 +59,7 @@
     </div>
 
     <!-- WALKMAN -->
-    <div class="item-wrap" id="item-walkman" onclick="openItem('walkman')">
+    <div class="item-wrap" id="item-walkman" data-tip="Walkman" onclick="openItem('walkman')">
       <div class="postit-note">
         Playlist<br>
         <a href="https://www.youtube.com/playlist?list=YOUR_PLAYLIST_ID" target="_blank" onclick="event.stopPropagation()">YouTube</a>

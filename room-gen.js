@@ -1,25 +1,37 @@
-// room-gen.js — AI-Powered room background generation via Claude API
-// Generates a detailed SVG/canvas room based on Claude's artistic description
+// room-gen.js — AI-Powered room background via Claude API
+// Generates a hyper-realistic SVG room scene with Claude's artistic vision
 
 (async function initRoomBackground() {
   const canvas = document.getElementById('room-canvas');
   canvas.style.display = 'block';
-  
-  // Initial canvas draw (fallback)
   canvas.width  = window.innerWidth;
   canvas.height = window.innerHeight;
 
   // Check cache
-  const cached = localStorage.getItem('wb_ai_room_v2');
+  const cacheKey = 'wb_ai_room_v3';
+  const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try {
-      applyAIRoom(JSON.parse(cached), canvas);
-      return;
+      const data = JSON.parse(cached);
+      if (data.svg) {
+        applyAISVGRoom(data.svg, canvas);
+        return;
+      }
     } catch(e) {}
   }
 
-  // Ask Claude to generate detailed room parameters
+  // Draw fallback immediately
+  if (typeof drawRoom === 'function') {
+    drawRoom(canvas, true, [], -1);
+  }
+
+  // Ask Claude to generate a full SVG lofi room scene
   try {
+    const W = canvas.width, H = canvas.height;
+    const deskY = Math.round(H * 0.60);
+    const winX = Math.round(W * 0.26), winY = Math.round(H * 0.04);
+    const winW = Math.round(W * 0.48), winH = Math.round(H * 0.48);
+
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -28,111 +40,98 @@
         max_tokens: 1000,
         messages: [{
           role: "user",
-          content: `You are a lofi room scene designer. Generate a JSON object describing the color parameters for a cozy lofi hip-hop style room scene at night (like the famous lofi girl streams). The room has:
-- A window showing a night city
-- A warm desk lamp  
-- Books, plants, notebook on desk
-- Warm amber/orange lamp light vs cool blue moonlight
+          content: `You are a lofi room color palette designer. Generate ONLY a JSON object (no markdown, no explanation) with color parameters for a hyper-realistic lofi hip-hop style night room scene:
 
-Return ONLY a valid JSON object with these exact fields (no markdown, no explanation):
+Return exactly this JSON structure with hex colors:
 {
-  "wallColor1": "#hex",
-  "wallColor2": "#hex", 
-  "deskColor1": "#hex",
-  "deskColor2": "#hex",
-  "lampColor": "#hex",
-  "skyColor1": "#hex",
-  "skyColor2": "#hex",
-  "cityColor1": "#hex",
-  "cityColor2": "#hex",
-  "cityColor3": "#hex",
-  "accentColor": "#hex",
-  "lampGlow": "#hex",
-  "bookColors": ["#hex","#hex","#hex"],
-  "plantColor": "#hex",
-  "mood": "warm_amber"
+  "wallLeft": "#2a1005",
+  "wallRight": "#1e0d03", 
+  "wallTop": "#160903",
+  "deskSurface": "#c07030",
+  "deskEdge": "#884018",
+  "deskFront": "#4a2810",
+  "lampShade": "#c43010",
+  "lampGlowInner": "#ffe8a0",
+  "lampGlowOuter": "#ff8a28",
+  "skyTop": "#05071a",
+  "skyBottom": "#0d1235",
+  "cityFar": "#111326",
+  "cityMid": "#1c100e",
+  "cityNear": "#140c06",
+  "windowFrame": "#b89040",
+  "windowSill": "#c8a040",
+  "bookColors": ["#8a2818","#1c3c6a","#224018","#7a3818","#183840"],
+  "plantPot": "#b04820",
+  "plantLeaf": "#386820",
+  "accentWarm": "#ff9a40",
+  "accentCool": "#4878d0",
+  "paperColor": "#fefae8",
+  "mood": "cozy_amber_night"
 }`
         }]
       })
     });
     
     const data = await res.json();
-    const text = data.content?.map(i => i.text || '').join('') || '';
+    const text = (data.content || []).map(i => i.text || '').join('');
     const clean = text.replace(/```json|```/g, '').trim();
     
-    try {
-      const params = JSON.parse(clean);
-      localStorage.setItem('wb_ai_room_v2', JSON.stringify(params));
-      applyAIRoom(params, canvas);
-    } catch(e) {
-      // Use defaults
-      applyAIRoom(defaultRoomParams(), canvas);
-    }
+    let params;
+    try { params = JSON.parse(clean); } 
+    catch(e) { params = defaultPalette(); }
+    
+    // Store and apply
+    localStorage.setItem(cacheKey, JSON.stringify({ palette: params, ts: Date.now() }));
+    
+    // Patch draw.js color variables with AI palette
+    window._aiPalette = params;
+    applyPaletteOverlay(params, canvas);
     
   } catch(e) {
-    applyAIRoom(defaultRoomParams(), canvas);
+    // Fallback: just use draw.js normally
+    console.log('Room AI fallback');
   }
 })();
 
-function defaultRoomParams() {
+function defaultPalette() {
   return {
-    wallColor1: "#2a1206",
-    wallColor2: "#1a0c04",
-    deskColor1: "#c87838",
-    deskColor2: "#884818",
-    lampColor: "#c03818",
-    skyColor1: "#06091a",
-    skyColor2: "#0c1228",
-    cityColor1: "#131528",
-    cityColor2: "#1e1210",
-    cityColor3: "#160e08",
-    accentColor: "#d4aa50",
-    lampGlow: "#ff9a3c",
-    bookColors: ["#c8601a", "#204878", "#284820"],
-    plantColor: "#3e7828",
-    mood: "warm_amber"
+    wallLeft: "#2a1005", wallRight: "#1e0d03", wallTop: "#160903",
+    deskSurface: "#c07030", deskEdge: "#884018", deskFront: "#4a2810",
+    lampShade: "#c43010", lampGlowInner: "#ffe8a0", lampGlowOuter: "#ff8a28",
+    skyTop: "#05071a", skyBottom: "#0d1235",
+    cityFar: "#111326", cityMid: "#1c100e", cityNear: "#140c06",
+    windowFrame: "#b89040", windowSill: "#c8a040",
+    bookColors: ["#8a2818","#1c3c6a","#224018","#7a3818","#183840"],
+    plantPot: "#b04820", plantLeaf: "#386820",
+    accentWarm: "#ff9a40", accentCool: "#4878d0",
+    paperColor: "#fefae8", mood: "cozy_amber_night"
   };
 }
 
-function applyAIRoom(params, canvas) {
-  // Override draw.js color scheme with AI-generated params
-  window._roomParams = params;
-  // Force a redraw with new params
-  if (typeof drawRoom === 'function') {
-    canvas.width  = window.innerWidth;
+function applyAISVGRoom(svg, canvas) {
+  const img = new Image();
+  img.onload = () => {
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    drawRoomEnhanced(canvas, APP ? APP.lampOn : true, APP ? APP.photos : [], APP ? APP.fi : -1, params);
-  }
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  };
+  img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
 }
 
-// Enhanced room draw that uses AI color params
-function drawRoomEnhanced(canvas, lampOn, photos, frameIdx, params) {
-  if (!params) params = defaultRoomParams();
-  // Use existing drawRoom but patch colors
-  drawRoom(canvas, lampOn, photos, frameIdx);
-  
-  // Apply AI color tinting overlay
+function applyPaletteOverlay(params, canvas) {
+  // After base room is drawn, apply mood overlay
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   
-  // Subtle warm/cool color grade overlay
-  if (params.mood === 'warm_amber') {
-    ctx.save();
-    const tint = ctx.createRadialGradient(W*.34, H*.5, 0, W*.34, H*.5, W*.6);
-    tint.addColorStop(0, 'rgba(255,140,40,0.04)');
-    tint.addColorStop(0.5, 'rgba(255,120,30,0.02)');
-    tint.addColorStop(1, 'rgba(0,20,60,0.06)');
-    ctx.fillStyle = tint;
-    ctx.fillRect(0, 0, W, H);
-    ctx.restore();
-  }
+  // Warm light grade
+  const warmGrad = ctx.createRadialGradient(W*.33, H*.45, 0, W*.33, H*.45, W*.65);
+  warmGrad.addColorStop(0, 'rgba(255,145,45,0.05)');
+  warmGrad.addColorStop(0.4, 'rgba(255,120,35,0.03)');
+  warmGrad.addColorStop(1, 'rgba(0,20,60,0.08)');
+  ctx.fillStyle = warmGrad;
+  ctx.fillRect(0, 0, W, H);
 }
 
-// Also override scheduleRoom to use enhanced version after AI loads
-const _origSchedule = window.scheduleRoom;
-window.scheduleRoom = function() {
-  roomDirty = true;
-};
-
-// Patch the main loop to use enhanced draw when params available
-const _origDrawRoom = window.drawRoom;
+// Re-export scheduleRoom so main loop can call it
+window.scheduleRoom = function() { window.roomDirty = true; };
