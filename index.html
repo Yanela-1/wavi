@@ -8,8 +8,9 @@
 <link rel="stylesheet" href="room.css">
 <link rel="stylesheet" href="overlay.css">
 </head>
-<body class="lamp-on">
+<body>
 
+<!-- GREETING SCREEN -->
 <div id="greeting">
   <div class="g-ring"><img id="g-gif" src="" alt=""></div>
   <div class="g-h">Good to see you,<br><em>Wabi!</em></div>
@@ -18,53 +19,40 @@
   <div class="g-grain"></div>
 </div>
 
+<!-- ROOM -->
 <div id="room">
   <div id="room-bg"></div>
-  <canvas id="room-canvas"></canvas>
 
+  <!-- Invisible hotspots over background image objects -->
   <div id="hotspot-layer">
-    <div id="lamp-btn" onclick="toggleLamp()" title="Toggle lamp"></div>
 
     <div class="hotspot" id="hs-camera" onclick="openItem('camera')">
-      <div class="hotspot-tip">📷 Camera</div>
-      <div class="hotspot-dots">
-        <span class="hdot"></span><span class="hdot"></span><span class="hdot"></span>
-      </div>
-    </div>
-
-    <div class="hotspot" id="hs-walkman" onclick="openItem('walkman')">
-      <div class="hotspot-tip">🎵 Walkman</div>
-      <div class="hotspot-dots">
-        <span class="hdot"></span><span class="hdot"></span><span class="hdot"></span>
-      </div>
-    </div>
-
-    <div class="hotspot" id="hs-envelope" onclick="openItem('envelope')" style="isolation:isolate">
-      <div class="item-badge" id="env-badge">0</div>
-      <div class="hotspot-tip">✉ Letters</div>
-      <div class="hotspot-dots">
-        <span class="hdot"></span><span class="hdot"></span><span class="hdot"></span>
-      </div>
+      <div class="hs-label">Camera</div>
     </div>
 
     <div class="hotspot" id="hs-frame" onclick="openItem('frame')">
-      <div class="hotspot-tip">🖼 Picture Frame</div>
-      <div class="hotspot-dots">
-        <span class="hdot"></span><span class="hdot"></span><span class="hdot"></span>
-      </div>
+      <div class="hs-label">Picture Frame</div>
+    </div>
+
+    <div class="hotspot" id="hs-walkman" onclick="openItem('walkman')">
+      <div class="hs-label">Walkman</div>
+    </div>
+
+    <div class="hotspot" id="hs-envelope" onclick="openItem('envelope')">
+      <div class="item-badge" id="env-badge">0</div>
+      <div class="hs-label">Envelope</div>
     </div>
 
     <div class="hotspot" id="hs-pencil" onclick="openNewLetter()">
-      <div class="hotspot-tip">✏ Write a Letter</div>
-      <div class="hotspot-dots">
-        <span class="hdot"></span><span class="hdot"></span><span class="hdot"></span>
-      </div>
+      <div class="hs-label">Write a Letter</div>
     </div>
+
   </div>
 
   <div id="room-grain"></div>
 </div>
 
+<!-- OVERLAY -->
 <div id="overlay" onclick="ovBgClick(event)">
   <div id="ov-wrap"></div>
 </div>
@@ -73,13 +61,6 @@
 <audio id="aud" preload="metadata"></audio>
 <input type="file" id="photo-up" accept="image/*" multiple style="display:none">
 <input type="file" id="song-up"  accept="audio/*"  multiple style="display:none">
-
-<div style="display:none">
-  <canvas id="cv-envelope" width="220" height="155"></canvas>
-  <canvas id="cv-camera"   width="260" height="185"></canvas>
-  <canvas id="cv-frame"    width="200" height="190"></canvas>
-  <canvas id="cv-walkman"  width="230" height="175"></canvas>
-</div>
 
 <script src="draw.js"></script>
 <script src="overlay.js"></script>
