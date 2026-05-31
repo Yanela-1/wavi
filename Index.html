@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>For Wabi</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Special+Elite&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="room.css">
+<link rel="stylesheet" href="overlay.css">
+</head>
+<body class="lamp-on">
+
+<!-- GREETING -->
+<div id="greeting">
+  <div class="g-ring"><img id="g-gif" src="" alt=""></div>
+  <div class="g-h">Good to see you,<br><em>Wabi!</em></div>
+  <div class="g-s">something sweet is waiting for you</div>
+  <button class="g-btn" onclick="enterRoom()">Come in</button>
+</div>
+
+<!-- ROOM -->
+<div id="room">
+  <canvas id="room-canvas"></canvas>
+  <div id="items-layer">
+
+    <!-- ENVELOPE -->
+    <div class="item-wrap" id="item-envelope" onclick="openItem('envelope')">
+      <canvas class="item-canvas" id="cv-envelope" width="220" height="155"></canvas>
+      <div class="item-badge" id="env-badge">0</div>
+      <button class="pen-btn" id="pen-btn" onclick="pencilClick(event)">pen <span id="pen-n">0</span>/10</button>
+      <div class="item-label">Letters</div>
+    </div>
+
+    <!-- CAMERA -->
+    <div class="item-wrap" id="item-camera" onclick="openItem('camera')">
+      <canvas class="item-canvas" id="cv-camera" width="260" height="185"></canvas>
+      <div class="item-label">Camera</div>
+    </div>
+
+    <!-- FRAME -->
+    <div class="item-wrap" id="item-frame" onclick="openItem('frame')">
+      <canvas class="item-canvas" id="cv-frame" width="200" height="190"></canvas>
+      <div class="item-label">Frame</div>
+    </div>
+
+    <!-- WALKMAN -->
+    <div class="item-wrap" id="item-walkman" onclick="openItem('walkman')" style="position:relative">
+      <div class="postit-note">
+        Playlist<br>
+        <a href="https://www.youtube.com/playlist?list=YOUR_PLAYLIST_ID" target="_blank" onclick="event.stopPropagation()">YouTube</a>
+        <a href="https://open.spotify.com/playlist/YOUR_PLAYLIST_ID" target="_blank" onclick="event.stopPropagation()">Spotify</a>
+      </div>
+      <canvas class="item-canvas" id="cv-walkman" width="230" height="175"></canvas>
+      <div class="item-label">Walkman</div>
+    </div>
+
+  </div><!-- items-layer -->
+
+  <!-- lamp click zone -->
+  <div id="lamp-btn" onclick="toggleLamp()"></div>
+</div><!-- room -->
+
+<!-- OVERLAY -->
+<div id="overlay" onclick="ovBgClick(event)">
+  <div id="ov-wrap"></div>
+</div>
+
+<div id="toast"></div>
+<audio id="aud" preload="metadata"></audio>
+<input type="file" id="photo-up" accept="image/*" multiple>
+<input type="file" id="song-up" accept="audio/*" multiple>
+
+<script src="draw.js"></script>
+<script src="overlay.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
