@@ -127,3 +127,93 @@ input[type=file]{display:none}
   .postit-note{display:none}
   #items-layer{gap:.35rem;padding:0 .25rem 2%}
 }
+/* ── ENHANCED 3D DEPTH & LOFI POLISH ─────────────────────────────────────── */
+
+/* Better 3D item hover with perspective */
+#items-layer {
+  perspective: 900px;
+  transform-style: preserve-3d;
+}
+
+.item-wrap {
+  transform-style: preserve-3d;
+  transition: transform .3s cubic-bezier(.34,1.4,.64,1);
+}
+
+.item-canvas {
+  filter:
+    drop-shadow(0 18px 35px rgba(0,0,0,.75))
+    drop-shadow(0 6px 12px rgba(0,0,0,.55))
+    drop-shadow(0 2px 4px rgba(0,0,0,.4));
+}
+
+.item-wrap:hover .item-canvas {
+  transform: translateY(-18px) scale(1.06) rotateX(-4deg);
+  filter:
+    drop-shadow(0 28px 50px rgba(0,0,0,.75))
+    drop-shadow(0 10px 20px rgba(0,0,0,.55))
+    drop-shadow(0 3px 6px rgba(0,0,0,.4));
+}
+
+.item-wrap:active .item-canvas {
+  transform: scale(.94) translateY(4px) rotateX(2deg);
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,.6));
+}
+
+/* Warm ambient on the room itself */
+#room::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 34% 60%, rgba(255,140,40,0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Greeting — deeper vignette */
+#greeting {
+  background: radial-gradient(ellipse at 50% 38%, #2c1608 0%, #150a02 55%, #050302 100%);
+}
+
+/* Post-it extra depth */
+.postit-note {
+  box-shadow:
+    2px 3px 0 rgba(200,175,20,.14),
+    3px 8px 20px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.5),
+    inset 0 -1px 0 rgba(0,0,0,.08);
+}
+
+/* Lamp button — subtle cursor glow */
+#lamp-btn:hover {
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,160,50,.1) 0%, transparent 70%);
+  border-radius: 0 0 50% 50%;
+}
+
+/* Toast — more depth */
+#toast {
+  box-shadow: 0 8px 28px rgba(0,0,0,.6), 0 2px 6px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+/* Room canvas subtle scanline texture */
+#room-canvas {
+  image-rendering: pixelated;
+}
+
+/* Overlay — richer film look */
+#overlay.on::before {
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.025) 3px),
+    repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(0,0,0,.01) 81px);
+}
+
+/* Item badge — more depth */
+.item-badge {
+  box-shadow: 0 2px 8px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,100,100,.25);
+}
+
+/* Pen button — 3D press effect */
+.pen-btn:active {
+  transform: scale(.96) rotate(-2deg);
+  box-shadow: 0 1px 3px rgba(0,0,0,.5);
+}
